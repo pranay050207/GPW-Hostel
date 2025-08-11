@@ -218,6 +218,127 @@ const Login = () => {
   );
 };
 
+// File Upload Component
+const FileUploadComponent = ({ fileType, uploadedFile, onUpload, uploadProgress, accept }) => {
+  const [dragOver, setDragOver] = useState(false);
+  const fileInputRef = React.useRef(null);
+
+  const handleFileSelect = async (file) => {
+    if (file) {
+      try {
+        await onUpload(file, fileType);
+      } catch (err) {
+        alert(`Failed to upload ${fileType}: ${err.message}`);
+      }
+    }
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    setDragOver(false);
+    const files = e.dataTransfer.files;
+    if (files.length > 0) {
+      handleFileSelect(files[0]);
+    }
+  };
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    setDragOver(true);
+  };
+
+  const handleDragLeave = (e) => {
+    e.preventDefault();
+    setDragOver(false);
+  };
+
+  const renderProgress = () => {
+    if (uploadProgress === undefined) return null;
+    if (uploadProgress === -1) {
+      return (
+        <div className="mt-2 flex items-center text-red-600">
+          <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          </svg>
+          <span className="text-sm">Upload failed</span>
+        </div>
+      );
+    }
+    if (uploadProgress === 100) {
+      return (
+        <div className="mt-2 flex items-center text-green-600">
+          <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+          </svg>
+          <span className="text-sm">Upload complete</span>
+        </div>
+      );
+    }
+    return (
+      <div className="mt-2">
+        <div className="bg-gray-200 rounded-full h-2">
+          <div 
+            className="bg-blue-600 h-2 rounded-full transition-all duration-300" 
+            style={{ width: `${uploadProgress}%` }}
+          ></div>
+        </div>
+        <span className="text-sm text-gray-600">{uploadProgress}%</span>
+      </div>
+    );
+  };
+
+  return (
+    <div className="space-y-2">
+      <div
+        className={`border-2 border-dashed rounded-lg p-4 text-center cursor-pointer transition-colors ${
+          dragOver
+            ? 'border-blue-400 bg-blue-50'
+            : uploadedFile
+            ? 'border-green-400 bg-green-50'
+            : 'border-gray-300 hover:border-gray-400'
+        }`}
+        onDrop={handleDrop}
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onClick={() => fileInputRef.current?.click()}
+      >
+        <input
+          type="file"
+          ref={fileInputRef}
+          accept={accept}
+          onChange={(e) => handleFileSelect(e.target.files[0])}
+          className="hidden"
+        />
+        
+        {uploadedFile ? (
+          <div className="flex items-center justify-center">
+            <svg className="w-8 h-8 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <div className="text-left">
+              <p className="text-sm font-medium text-green-800">File uploaded</p>
+              <p className="text-xs text-green-600">{uploadedFile}</p>
+            </div>
+          </div>
+        ) : (
+          <div>
+            <svg className="w-8 h-8 text-gray-400 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+            </svg>
+            <p className="text-sm text-gray-600">
+              Drop file here or click to browse
+            </p>
+            <p className="text-xs text-gray-500 mt-1">
+              {accept.replace(/\./g, '').toUpperCase()} files only (Max 5MB)
+            </p>
+          </div>
+        )}
+      </div>
+      {renderProgress()}
+    </div>
+  );
+};
+
 // Student Dashboard
 const StudentDashboard = () => {
   const [activeTab, setActiveTab] = useState('room');

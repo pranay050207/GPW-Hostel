@@ -51,20 +51,29 @@ const API_BASE_URL = process.env.REACT_APP_BACKEND_URL;
 
 const apiCall = async (endpoint, options = {}) => {
   const token = localStorage.getItem('token');
-  const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-    headers: {
-      'Content-Type': 'application/json',
-      ...(token && { Authorization: `Bearer ${token}` }),
-      ...options.headers,
-    },
-    ...options,
-  });
 
-  if (!response.ok) {
-    throw new Error(await response.text());
+  try {
+    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token && { Authorization: `Bearer ${token}` }),
+        ...options.headers,
+      },
+      ...options,
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(errorText || `HTTP ${response.status}: ${response.statusText}`);
+    }
+
+    return response.json();
+  } catch (error) {
+    if (error.name === 'TypeError' && error.message === 'Failed to fetch') {
+      throw new Error('Unable to connect to server. Please check if the backend is running.');
+    }
+    throw error;
   }
-
-  return response.json();
 };
 
 // Login Component

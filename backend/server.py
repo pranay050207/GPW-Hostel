@@ -129,6 +129,26 @@ class MessMenuCreate(BaseModel):
     meal_type: str
     items: List[str]
 
+class RenewalForm(BaseModel):
+    id: str
+    student_id: str
+    student_name: str
+    room_number: str
+    status: str = "submitted"  # "submitted", "under_review", "approved", "rejected"
+    files: dict = {}  # {"aadhar": "filename", "result": "filename", "caste_cert": "filename", "photo": "filename"}
+    admin_comments: Optional[str] = None
+    created_at: str
+    updated_at: str
+    reviewed_at: Optional[str] = None
+    reviewed_by: Optional[str] = None
+
+class RenewalFormCreate(BaseModel):
+    files: dict = {}
+
+class RenewalFormUpdate(BaseModel):
+    status: Optional[str] = None
+    admin_comments: Optional[str] = None
+
 # JWT utility functions
 def create_access_token(data: dict):
     to_encode = data.copy()

@@ -102,7 +102,7 @@
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
 
-user_problem_statement: "Build a modern and elegant hostel (dorm) management android app using java and xml with separate login for student and admin. Features: students - view room status, submit complaints, check payment status, view mess menu. Admin - manage and allocate rooms, manage students, handle maintenance requests, payment tracking, mess management."
+user_problem_statement: "Build a modern and elegant hostel (dorm) management android app using java and xml with separate login for student and admin. Features: students - view room status, submit complaints, check payment status, view mess menu. Admin - manage and allocate rooms, manage students, handle maintenance requests, payment tracking, mess management. ADDITION: Add renewal form functionality with file upload support where students can upload required documents (Aadhar card, previous semester result, caste certificate, passport photo) and admins can approve/reject with comments. Only students with assigned rooms can submit renewal forms."
 
 backend:
   - task: "User Authentication System"

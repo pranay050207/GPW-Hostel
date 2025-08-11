@@ -195,6 +195,18 @@ backend:
         - agent: "testing"
         - comment: "✅ PASSED - All student management tests successful: Admin student listing, student deletion with room cleanup, and proper role-based access control working correctly."
 
+  - task: "Renewal Form System"
+    implemented: true
+    working: false
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: "NA"
+        - agent: "main"
+        - comment: "Implemented complete renewal form system with file upload functionality. Features include: chunked file upload support, renewal form CRUD operations, approval workflow (submitted → under_review → approved/rejected), and access control ensuring only students with assigned rooms can submit forms. Supports uploading Aadhar card, previous semester result, caste certificate, and passport photo."
+
 frontend:
   - task: "Mobile-First Responsive Design"
     implemented: true

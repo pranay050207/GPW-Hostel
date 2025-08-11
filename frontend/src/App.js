@@ -187,9 +187,9 @@ const Login = () => {
               </div>
             )}
             {connectionStatus === 'disconnected' && (
-              <div className="flex items-center text-red-600">
-                <div className="w-2 h-2 bg-red-500 rounded-full mr-2"></div>
-                <span className="text-sm">Backend Offline</span>
+              <div className="flex items-center text-orange-600">
+                <div className="w-2 h-2 bg-orange-500 rounded-full mr-2"></div>
+                <span className="text-sm">Demo Mode</span>
               </div>
             )}
           </div>

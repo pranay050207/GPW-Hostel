@@ -1,6 +1,8 @@
-from fastapi import FastAPI, HTTPException, Depends
+from fastapi import FastAPI, HTTPException, Depends, UploadFile, File, Form
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 from pydantic import BaseModel
 from typing import List, Optional
 import jwt
@@ -9,6 +11,8 @@ from datetime import datetime, timedelta
 import os
 from pymongo import MongoClient
 import uuid
+import aiofiles
+import shutil
 
 # Load environment variables
 from dotenv import load_dotenv

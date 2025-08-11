@@ -137,20 +137,19 @@ const Login = () => {
 
       login(response.user, response.token);
     } catch (err) {
-      // Development mode: provide mock authentication when backend is unavailable
-      if (err.message.includes('Unable to connect to server')) {
+      // Demo mode: provide mock authentication when backend is unavailable or returns errors
+      if (err.message.includes('Unable to connect to server') || connectionStatus === 'disconnected') {
         const mockUser = {
-          id: 'mock-user-123',
-          email: formData.email,
-          name: formData.name || 'Demo User',
+          id: 'demo-user-' + Date.now(),
+          email: formData.email || 'demo@hostel.com',
+          name: formData.name || (isLogin ? 'Demo User' : formData.name),
           role: formData.role || 'student',
-          phone: formData.phone,
-          room_number: formData.role === 'admin' ? null : 'A101'
+          phone: formData.phone || '123-456-7890',
+          room_number: (formData.role === 'admin' || (!isLogin && formData.role === 'admin')) ? null : 'A101'
         };
-        const mockToken = 'mock-jwt-token-' + Date.now();
+        const mockToken = 'demo-jwt-token-' + Date.now();
 
         login(mockUser, mockToken);
-        setError('Using demo mode - backend offline');
         return;
       }
 

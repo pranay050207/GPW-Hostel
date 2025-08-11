@@ -28,7 +28,8 @@ class HostelTestSuite:
             "complaint_system": {"passed": 0, "failed": 0, "errors": []},
             "payment_system": {"passed": 0, "failed": 0, "errors": []},
             "mess_menu": {"passed": 0, "failed": 0, "errors": []},
-            "student_management": {"passed": 0, "failed": 0, "errors": []}
+            "student_management": {"passed": 0, "failed": 0, "errors": []},
+            "renewal_system": {"passed": 0, "failed": 0, "errors": []}
         }
 
     def log_result(self, category, test_name, success, error_msg=None):

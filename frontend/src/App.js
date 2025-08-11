@@ -225,18 +225,23 @@ const StudentDashboard = () => {
   const [complaints, setComplaints] = useState([]);
   const [payments, setPayments] = useState([]);
   const [messMenu, setMessMenu] = useState([]);
+  const [renewalForms, setRenewalForms] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState({});
   const [newComplaint, setNewComplaint] = useState({
     title: '',
     description: '',
     category: 'maintenance'
   });
+  const [currentRenewalForm, setCurrentRenewalForm] = useState(null);
+  const [uploadedFiles, setUploadedFiles] = useState({});
   const { user, logout } = useAuth();
 
   useEffect(() => {
     if (activeTab === 'room') loadRoomInfo();
     else if (activeTab === 'complaints') loadComplaints();
     else if (activeTab === 'payments') loadPayments();
+    else if (activeTab === 'renewal') loadRenewalForms();
     else if (activeTab === 'mess') loadMessMenu();
   }, [activeTab]);
 

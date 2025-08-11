@@ -149,6 +149,28 @@ const Login = () => {
           </div>
           <h1 className="text-3xl font-bold text-gray-800">Hostel Manager</h1>
           <p className="text-gray-600 mt-2">Modern Dorm Management System</p>
+
+          {/* Connection Status */}
+          <div className="mt-3 flex items-center justify-center">
+            {connectionStatus === 'checking' && (
+              <div className="flex items-center text-yellow-600">
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-yellow-600 mr-2"></div>
+                <span className="text-sm">Checking connection...</span>
+              </div>
+            )}
+            {connectionStatus === 'connected' && (
+              <div className="flex items-center text-green-600">
+                <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
+                <span className="text-sm">Connected</span>
+              </div>
+            )}
+            {connectionStatus === 'disconnected' && (
+              <div className="flex items-center text-red-600">
+                <div className="w-2 h-2 bg-red-500 rounded-full mr-2"></div>
+                <span className="text-sm">Backend Offline</span>
+              </div>
+            )}
+          </div>
         </div>
 
         <div className="flex bg-gray-100 rounded-lg p-1 mb-6">

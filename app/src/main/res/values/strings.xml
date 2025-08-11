@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Hostel Manager</string>
+    <string name="app_name">GPW Hostel Manager</string>
     <string name="app_subtitle">Modern Dorm Management System</string>
     
     <!-- Authentication -->
@@ -80,19 +80,6 @@
     <string name="due">Due: %s</string>
     <string name="paid_date">Paid: %s</string>
     
-    <!-- File Upload -->
-    <string name="upload_required_documents">Upload Required Documents</string>
-    <string name="aadhar_card">Aadhar Card</string>
-    <string name="previous_semester_result">Previous Semester Result</string>
-    <string name="caste_certificate">Caste Certificate (if applicable)</string>
-    <string name="passport_photo">Passport Size Photo</string>
-    <string name="required_field">*</string>
-    <string name="file_uploaded">File uploaded</string>
-    <string name="drop_file_or_click">Drop file here or click to browse</string>
-    <string name="file_types_allowed">JPG, PNG, PDF files only (Max 5MB)</string>
-    <string name="upload_complete">Upload complete</string>
-    <string name="upload_failed">Upload failed</string>
-    
     <!-- Errors -->
     <string name="error_invalid_credentials">Invalid credentials</string>
     <string name="error_network">Network error. Please check your connection.</string>
@@ -103,5 +90,4 @@
     <string name="success_login">Login successful</string>
     <string name="success_register">Registration successful</string>
     <string name="success_complaint_submitted">Complaint submitted successfully</string>
-    <string name="success_file_uploaded">File uploaded successfully</string>
 </resources>

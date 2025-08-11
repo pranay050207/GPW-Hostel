@@ -976,6 +976,7 @@ const AdminDashboard = () => {
     else if (activeTab === 'students') loadStudents();
     else if (activeTab === 'complaints') loadComplaints();
     else if (activeTab === 'payments') loadPayments();
+    else if (activeTab === 'renewals') loadRenewals();
     else if (activeTab === 'mess') loadMessMenu();
   }, [activeTab]);
 

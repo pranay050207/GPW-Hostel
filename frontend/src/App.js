@@ -625,6 +625,150 @@ const StudentDashboard = () => {
             </div>
           )}
 
+          {/* Renewal Tab */}
+          {activeTab === 'renewal' && !loading && (
+            <div>
+              <h2 className="text-xl font-semibold mb-6">Room Renewal Application</h2>
+              
+              {/* Check if user has room */}
+              {!roomInfo ? (
+                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6 text-center">
+                  <svg className="w-12 h-12 text-yellow-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                  </svg>
+                  <p className="text-yellow-800 font-medium">No Room Assigned</p>
+                  <p className="text-yellow-700 text-sm mt-1">You must be assigned to a room to submit a renewal form.</p>
+                </div>
+              ) : (
+                <div className="space-y-6">
+                  {/* Current Status */}
+                  {currentRenewalForm && (
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                      <div className="flex justify-between items-start mb-2">
+                        <h3 className="font-semibold text-blue-900">Current Application Status</h3>
+                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(currentRenewalForm.status)}`}>
+                          {currentRenewalForm.status.replace('_', ' ')}
+                        </span>
+                      </div>
+                      <p className="text-blue-800 text-sm">Submitted: {new Date(currentRenewalForm.created_at).toLocaleDateString()}</p>
+                      {currentRenewalForm.admin_comments && (
+                        <div className="mt-3 p-3 bg-white rounded border">
+                          <p className="text-sm font-medium text-gray-700">Admin Comments:</p>
+                          <p className="text-sm text-gray-600 mt-1">{currentRenewalForm.admin_comments}</p>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* File Upload Section */}
+                  {(!currentRenewalForm || ['submitted', 'under_review'].includes(currentRenewalForm?.status)) && (
+                    <div className="bg-gray-50 rounded-lg p-6">
+                      <h3 className="font-semibold mb-4">
+                        {currentRenewalForm ? 'Update Documents' : 'Upload Required Documents'}
+                      </h3>
+                      
+                      <div className="grid md:grid-cols-2 gap-6">
+                        {/* Aadhar Card */}
+                        <div className="space-y-2">
+                          <label className="block text-sm font-medium text-gray-700">
+                            Aadhar Card <span className="text-red-500">*</span>
+                          </label>
+                          <FileUploadComponent 
+                            fileType="aadhar"
+                            uploadedFile={uploadedFiles.aadhar}
+                            onUpload={uploadFile}
+                            uploadProgress={uploadProgress.aadhar}
+                            accept=".jpg,.jpeg,.png,.pdf"
+                          />
+                        </div>
+
+                        {/* Previous Semester Result */}
+                        <div className="space-y-2">
+                          <label className="block text-sm font-medium text-gray-700">
+                            Previous Semester Result <span className="text-red-500">*</span>
+                          </label>
+                          <FileUploadComponent 
+                            fileType="result"
+                            uploadedFile={uploadedFiles.result}
+                            onUpload={uploadFile}
+                            uploadProgress={uploadProgress.result}
+                            accept=".jpg,.jpeg,.png,.pdf"
+                          />
+                        </div>
+
+                        {/* Caste Certificate */}
+                        <div className="space-y-2">
+                          <label className="block text-sm font-medium text-gray-700">
+                            Caste Certificate (if applicable)
+                          </label>
+                          <FileUploadComponent 
+                            fileType="caste_cert"
+                            uploadedFile={uploadedFiles.caste_cert}
+                            onUpload={uploadFile}
+                            uploadProgress={uploadProgress.caste_cert}
+                            accept=".jpg,.jpeg,.png,.pdf"
+                          />
+                        </div>
+
+                        {/* Passport Size Photo */}
+                        <div className="space-y-2">
+                          <label className="block text-sm font-medium text-gray-700">
+                            Passport Size Photo <span className="text-red-500">*</span>
+                          </label>
+                          <FileUploadComponent 
+                            fileType="photo"
+                            uploadedFile={uploadedFiles.photo}
+                            onUpload={uploadFile}
+                            uploadProgress={uploadProgress.photo}
+                            accept=".jpg,.jpeg,.png"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="mt-6">
+                        <button
+                          onClick={submitRenewalForm}
+                          disabled={Object.keys(uploadedFiles).length === 0}
+                          className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          {currentRenewalForm ? 'Update Application' : 'Submit Renewal Application'}
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Application History */}
+                  {renewalForms.length > 0 && (
+                    <div>
+                      <h3 className="font-semibold mb-4">Application History</h3>
+                      <div className="space-y-3">
+                        {renewalForms.map((form) => (
+                          <div key={form.id} className="border border-gray-200 rounded-lg p-4">
+                            <div className="flex justify-between items-start mb-2">
+                              <div>
+                                <p className="text-sm text-gray-600">Room: {form.room_number}</p>
+                                <p className="text-sm text-gray-500">Submitted: {new Date(form.created_at).toLocaleDateString()}</p>
+                              </div>
+                              <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(form.status)}`}>
+                                {form.status.replace('_', ' ')}
+                              </span>
+                            </div>
+                            {form.admin_comments && (
+                              <div className="mt-2 p-2 bg-gray-50 rounded text-sm">
+                                <p className="font-medium text-gray-700">Admin Comments:</p>
+                                <p className="text-gray-600">{form.admin_comments}</p>
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
+
           {/* Mess Menu Tab */}
           {activeTab === 'mess' && !loading && (
             <div>

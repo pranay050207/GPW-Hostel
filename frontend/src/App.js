@@ -293,6 +293,98 @@ const StudentDashboard = () => {
     }
   };
 
+  const loadRenewalForms = async () => {
+    setLoading(true);
+    try {
+      const response = await apiCall('/api/renewal-forms');
+      setRenewalForms(response);
+      // Load the current pending form if exists
+      const pendingForm = response.find(form => ['submitted', 'under_review'].includes(form.status));
+      setCurrentRenewalForm(pendingForm || null);
+      if (pendingForm) {
+        setUploadedFiles(pendingForm.files || {});
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const uploadFile = async (file, fileType) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('file_type', fileType);
+
+    setUploadProgress(prev => ({ ...prev, [fileType]: 0 }));
+
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`${API_BASE_URL}/api/upload-file`, {
+        method: 'POST',
+        headers: {
+          ...(token && { Authorization: `Bearer ${token}` }),
+        },
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText);
+      }
+
+      const result = await response.json();
+      
+      // Update uploaded files
+      const newUploadedFiles = { ...uploadedFiles, [fileType]: result.filename };
+      setUploadedFiles(newUploadedFiles);
+      
+      // Update current renewal form or create new one
+      if (currentRenewalForm) {
+        await apiCall(`/api/renewal-forms/${currentRenewalForm.id}/files`, {
+          method: 'PUT',
+          body: JSON.stringify(newUploadedFiles),
+        });
+      }
+
+      setUploadProgress(prev => ({ ...prev, [fileType]: 100 }));
+      
+      return result;
+    } catch (err) {
+      setUploadProgress(prev => ({ ...prev, [fileType]: -1 }));
+      throw err;
+    }
+  };
+
+  const submitRenewalForm = async () => {
+    try {
+      if (Object.keys(uploadedFiles).length === 0) {
+        alert('Please upload at least one document');
+        return;
+      }
+
+      if (currentRenewalForm) {
+        // Update existing form
+        await apiCall(`/api/renewal-forms/${currentRenewalForm.id}/files`, {
+          method: 'PUT',
+          body: JSON.stringify(uploadedFiles),
+        });
+        alert('Renewal form updated successfully!');
+      } else {
+        // Create new form
+        await apiCall('/api/renewal-forms', {
+          method: 'POST',
+          body: JSON.stringify({ files: uploadedFiles }),
+        });
+        alert('Renewal form submitted successfully!');
+      }
+      
+      loadRenewalForms();
+    } catch (err) {
+      alert(err.message);
+    }
+  };
+
   const submitComplaint = async (e) => {
     e.preventDefault();
     try {

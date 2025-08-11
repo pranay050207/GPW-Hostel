@@ -10,7 +10,7 @@ import sys
 from datetime import datetime, timedelta
 
 # Backend URL from environment
-BACKEND_URL = "https://02771881-43f4-4949-b76f-8546df5d2e55.preview.emergentagent.com/api"
+BACKEND_URL = "https://51057cfa-c9a2-4e25-b131-f97d76613868.preview.emergentagent.com/api"
 
 class HostelTestSuite:
     def __init__(self):

@@ -88,7 +88,31 @@ const Login = () => {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [connectionStatus, setConnectionStatus] = useState('checking');
   const { login } = useAuth();
+
+  // Check backend connection on component mount
+  useEffect(() => {
+    const checkConnection = async () => {
+      try {
+        const response = await fetch(`${API_BASE_URL}/api/rooms`, {
+          method: 'HEAD',
+          timeout: 5000
+        });
+        setConnectionStatus('connected');
+      } catch (err) {
+        setConnectionStatus('disconnected');
+        setError('Backend server is not accessible. Please start the backend service.');
+      }
+    };
+
+    if (API_BASE_URL) {
+      checkConnection();
+    } else {
+      setConnectionStatus('disconnected');
+      setError('Backend URL not configured.');
+    }
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();

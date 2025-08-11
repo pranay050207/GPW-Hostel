@@ -942,6 +942,7 @@ const AdminDashboard = () => {
   const [students, setStudents] = useState([]);
   const [complaints, setComplaints] = useState([]);
   const [payments, setPayments] = useState([]);
+  const [renewals, setRenewals] = useState([]);
   const [messMenu, setMessMenu] = useState([]);
   const [loading, setLoading] = useState(false);
   const { user, logout } = useAuth();

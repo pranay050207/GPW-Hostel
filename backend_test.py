@@ -543,6 +543,205 @@ class HostelTestSuite:
             except Exception as e:
                 self.log_result("student_management", "Unauthorized Student Deletion Block", False, str(e))
 
+    def test_renewal_form_system(self):
+        """Test renewal form functionality with file uploads"""
+        print("\n📋 Testing Renewal Form System...")
+        
+        if not self.admin_token or not self.student_token or not self.student_user:
+            self.log_result("renewal_system", "Renewal Form Tests", False, "Missing required tokens or user data")
+            return
+
+        admin_headers = {"Authorization": f"Bearer {self.admin_token}"}
+        student_headers = {"Authorization": f"Bearer {self.student_token}"}
+
+        # Test 1: File Upload API - Valid file upload
+        print("  Testing file upload functionality...")
+        
+        # Create a test image file
+        test_image_content = b'\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x01\x00\x00\x00\x01\x08\x02\x00\x00\x00\x90wS\xde\x00\x00\x00\tpHYs\x00\x00\x0b\x13\x00\x00\x0b\x13\x01\x00\x9a\x9c\x18\x00\x00\x00\nIDATx\x9cc\xf8\x00\x00\x00\x01\x00\x01\x00\x00\x00\x00IEND\xaeB`\x82'
+        
+        try:
+            files = {'file': ('aadhar.png', io.BytesIO(test_image_content), 'image/png')}
+            data = {'file_type': 'aadhar'}
+            response = requests.post(f"{BACKEND_URL}/upload-file", files=files, data=data, headers=student_headers)
+            
+            if response.status_code == 200:
+                upload_result = response.json()
+                self.log_result("renewal_system", "Valid File Upload (PNG)", True)
+                aadhar_filename = upload_result.get('filename')
+            else:
+                self.log_result("renewal_system", "Valid File Upload (PNG)", False, f"Status: {response.status_code}, Response: {response.text}")
+                aadhar_filename = None
+        except Exception as e:
+            self.log_result("renewal_system", "Valid File Upload (PNG)", False, str(e))
+            aadhar_filename = None
+
+        # Test 2: File Upload API - Invalid file type
+        try:
+            files = {'file': ('test.txt', io.BytesIO(b'test content'), 'text/plain')}
+            data = {'file_type': 'aadhar'}
+            response = requests.post(f"{BACKEND_URL}/upload-file", files=files, data=data, headers=student_headers)
+            
+            if response.status_code == 400:
+                self.log_result("renewal_system", "Invalid File Type Rejection", True)
+            else:
+                self.log_result("renewal_system", "Invalid File Type Rejection", False, f"Expected 400, got {response.status_code}")
+        except Exception as e:
+            self.log_result("renewal_system", "Invalid File Type Rejection", False, str(e))
+
+        # Test 3: File Upload API - Unauthorized access (admin trying to upload)
+        try:
+            files = {'file': ('test.png', io.BytesIO(test_image_content), 'image/png')}
+            data = {'file_type': 'photo'}
+            response = requests.post(f"{BACKEND_URL}/upload-file", files=files, data=data, headers=admin_headers)
+            
+            if response.status_code == 403:
+                self.log_result("renewal_system", "Admin File Upload Block", True)
+            else:
+                self.log_result("renewal_system", "Admin File Upload Block", False, f"Expected 403, got {response.status_code}")
+        except Exception as e:
+            self.log_result("renewal_system", "Admin File Upload Block", False, str(e))
+
+        # Test 4: Renewal Form Creation - Valid submission
+        renewal_form_data = {
+            "files": {
+                "aadhar": aadhar_filename if aadhar_filename else "aadhar_test.png",
+                "result": "result_test.pdf",
+                "photo": "photo_test.jpg"
+            }
+        }
+        
+        renewal_form_id = None
+        try:
+            response = requests.post(f"{BACKEND_URL}/renewal-forms", json=renewal_form_data, headers=student_headers)
+            if response.status_code == 200:
+                self.log_result("renewal_system", "Student Renewal Form Creation", True)
+                # Get the created form ID for further tests
+                forms_response = requests.get(f"{BACKEND_URL}/renewal-forms", headers=student_headers)
+                if forms_response.status_code == 200:
+                    forms = forms_response.json()
+                    if forms:
+                        renewal_form_id = forms[0]['id']
+            else:
+                self.log_result("renewal_system", "Student Renewal Form Creation", False, f"Status: {response.status_code}, Response: {response.text}")
+        except Exception as e:
+            self.log_result("renewal_system", "Student Renewal Form Creation", False, str(e))
+
+        # Test 5: Access Control - Student without room trying to submit
+        # Create a student without room assignment
+        no_room_student_data = {
+            "email": "noroom.student@hostel.edu",
+            "password": "NoRoomPass123!",
+            "name": "No Room Student",
+            "role": "student",
+            "phone": "+1-555-0888"
+        }
+        
+        no_room_token = None
+        try:
+            response = requests.post(f"{BACKEND_URL}/register", json=no_room_student_data)
+            if response.status_code == 200:
+                no_room_token = response.json()["token"]
+                
+                # Try to submit renewal form without room
+                no_room_headers = {"Authorization": f"Bearer {no_room_token}"}
+                response = requests.post(f"{BACKEND_URL}/renewal-forms", json=renewal_form_data, headers=no_room_headers)
+                
+                if response.status_code == 400:
+                    self.log_result("renewal_system", "No Room Access Control", True)
+                else:
+                    self.log_result("renewal_system", "No Room Access Control", False, f"Expected 400, got {response.status_code}")
+            else:
+                self.log_result("renewal_system", "No Room Access Control", False, "Failed to create test student")
+        except Exception as e:
+            self.log_result("renewal_system", "No Room Access Control", False, str(e))
+
+        # Test 6: Renewal Form Retrieval - Student viewing their forms
+        try:
+            response = requests.get(f"{BACKEND_URL}/renewal-forms", headers=student_headers)
+            if response.status_code == 200:
+                forms = response.json()
+                if isinstance(forms, list):
+                    self.log_result("renewal_system", "Student Form Retrieval", True)
+                else:
+                    self.log_result("renewal_system", "Student Form Retrieval", False, "Response is not a list")
+            else:
+                self.log_result("renewal_system", "Student Form Retrieval", False, f"Status: {response.status_code}")
+        except Exception as e:
+            self.log_result("renewal_system", "Student Form Retrieval", False, str(e))
+
+        # Test 7: Admin viewing all renewal forms
+        try:
+            response = requests.get(f"{BACKEND_URL}/renewal-forms", headers=admin_headers)
+            if response.status_code == 200:
+                forms = response.json()
+                if isinstance(forms, list):
+                    self.log_result("renewal_system", "Admin Form Retrieval", True)
+                else:
+                    self.log_result("renewal_system", "Admin Form Retrieval", False, "Response is not a list")
+            else:
+                self.log_result("renewal_system", "Admin Form Retrieval", False, f"Status: {response.status_code}")
+        except Exception as e:
+            self.log_result("renewal_system", "Admin Form Retrieval", False, str(e))
+
+        # Test 8: Admin Status Updates - Approval workflow
+        if renewal_form_id:
+            try:
+                # Update to under_review
+                update_data = {
+                    "status": "under_review",
+                    "admin_comments": "Reviewing submitted documents"
+                }
+                response = requests.put(f"{BACKEND_URL}/renewal-forms/{renewal_form_id}", json=update_data, headers=admin_headers)
+                
+                if response.status_code == 200:
+                    self.log_result("renewal_system", "Admin Status Update (Under Review)", True)
+                else:
+                    self.log_result("renewal_system", "Admin Status Update (Under Review)", False, f"Status: {response.status_code}, Response: {response.text}")
+            except Exception as e:
+                self.log_result("renewal_system", "Admin Status Update (Under Review)", False, str(e))
+
+            try:
+                # Update to approved
+                update_data = {
+                    "status": "approved",
+                    "admin_comments": "All documents verified. Renewal approved."
+                }
+                response = requests.put(f"{BACKEND_URL}/renewal-forms/{renewal_form_id}", json=update_data, headers=admin_headers)
+                
+                if response.status_code == 200:
+                    self.log_result("renewal_system", "Admin Status Update (Approved)", True)
+                else:
+                    self.log_result("renewal_system", "Admin Status Update (Approved)", False, f"Status: {response.status_code}, Response: {response.text}")
+            except Exception as e:
+                self.log_result("renewal_system", "Admin Status Update (Approved)", False, str(e))
+
+        # Test 9: Unauthorized admin actions (student trying to update status)
+        if renewal_form_id:
+            try:
+                update_data = {
+                    "status": "rejected",
+                    "admin_comments": "Student trying to reject their own form"
+                }
+                response = requests.put(f"{BACKEND_URL}/renewal-forms/{renewal_form_id}", json=update_data, headers=student_headers)
+                
+                if response.status_code == 403:
+                    self.log_result("renewal_system", "Student Status Update Block", True)
+                else:
+                    self.log_result("renewal_system", "Student Status Update Block", False, f"Expected 403, got {response.status_code}")
+            except Exception as e:
+                self.log_result("renewal_system", "Student Status Update Block", False, str(e))
+
+        # Test 10: Duplicate form submission prevention
+        try:
+            response = requests.post(f"{BACKEND_URL}/renewal-forms", json=renewal_form_data, headers=student_headers)
+            if response.status_code == 400:
+                self.log_result("renewal_system", "Duplicate Form Prevention", True)
+            else:
+                self.log_result("renewal_system", "Duplicate Form Prevention", False, f"Expected 400, got {response.status_code}")
+        except Exception as e:
+            self.log_result("renewal_system", "Duplicate Form Prevention", False, str(e))
+
     def run_all_tests(self):
         """Run all test suites"""
         print("🚀 Starting Hostel Management System Backend Tests...")

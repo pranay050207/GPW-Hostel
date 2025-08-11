@@ -99,10 +99,15 @@ const Login = () => {
           method: 'HEAD',
           timeout: 5000
         });
+
+        // Accept any response that's not a network error
+        // Even 404 means the server is reachable
         setConnectionStatus('connected');
+        setError(''); // Clear any previous errors
       } catch (err) {
+        console.log('Backend connection error:', err);
         setConnectionStatus('disconnected');
-        setError('Backend server is not accessible. Please start the backend service.');
+        setError('Demo mode active - backend unavailable. You can still explore the interface.');
       }
     };
 

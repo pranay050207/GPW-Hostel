@@ -1,0 +1,93 @@
+<resources>
+    <string name="app_name">GPW Hostel Manager</string>
+    <string name="app_subtitle">Modern Dorm Management System</string>
+    
+    <!-- Authentication -->
+    <string name="login">Login</string>
+    <string name="register">Register</string>
+    <string name="email">Email</string>
+    <string name="password">Password</string>
+    <string name="full_name">Full Name</string>
+    <string name="phone">Phone</string>
+    <string name="role">Role</string>
+    <string name="student">Student</string>
+    <string name="admin">Admin</string>
+    <string name="create_account">Create Account</string>
+    <string name="please_wait">Please wait...</string>
+    <string name="demo_mode">Demo Mode</string>
+    <string name="connected">Connected</string>
+    <string name="checking_connection">Checking connection...</string>
+    <string name="backend_offline">Backend Offline</string>
+    
+    <!-- Dashboard -->
+    <string name="welcome">Welcome, %s</string>
+    <string name="admin_dashboard">Admin Dashboard</string>
+    <string name="student_dashboard">Student Dashboard</string>
+    <string name="logout">Logout</string>
+    
+    <!-- Navigation -->
+    <string name="my_room">My Room</string>
+    <string name="complaints">Complaints</string>
+    <string name="payments">Payments</string>
+    <string name="renewal">Renewal</string>
+    <string name="mess_menu">Mess Menu</string>
+    <string name="rooms">Rooms</string>
+    <string name="students">Students</string>
+    <string name="renewals">Renewals</string>
+    
+    <!-- Room Management -->
+    <string name="room_information">Room Information</string>
+    <string name="room_details">Room Details</string>
+    <string name="room_number">Room Number</string>
+    <string name="room_type">Room Type</string>
+    <string name="floor">Floor</string>
+    <string name="capacity">Capacity</string>
+    <string name="currently_occupied">Currently Occupied</string>
+    <string name="roommates">Roommates</string>
+    <string name="no_roommates">No roommates</string>
+    <string name="no_room_assigned">No Room Assigned</string>
+    <string name="contact_admin_for_room">Please contact the admin to assign you a room.</string>
+    
+    <!-- Complaints -->
+    <string name="my_complaints">My Complaints</string>
+    <string name="submit_new_complaint">Submit New Complaint</string>
+    <string name="complaint_title">Complaint Title</string>
+    <string name="complaint_description">Describe your complaint in detail...</string>
+    <string name="submit_complaint">Submit Complaint</string>
+    <string name="category">Category</string>
+    <string name="maintenance">Maintenance</string>
+    <string name="cleanliness">Cleanliness</string>
+    <string name="electrical">Electrical</string>
+    <string name="plumbing">Plumbing</string>
+    <string name="other">Other</string>
+    <string name="no_complaints">No complaints submitted yet.</string>
+    
+    <!-- Status -->
+    <string name="pending">Pending</string>
+    <string name="in_progress">In Progress</string>
+    <string name="resolved">Resolved</string>
+    <string name="paid">Paid</string>
+    <string name="overdue">Overdue</string>
+    <string name="available">Available</string>
+    <string name="full">Full</string>
+    <string name="under_review">Under Review</string>
+    <string name="approved">Approved</string>
+    <string name="rejected">Rejected</string>
+    
+    <!-- Payments -->
+    <string name="payment_status">Payment Status</string>
+    <string name="no_payment_records">No payment records found.</string>
+    <string name="due">Due: %s</string>
+    <string name="paid_date">Paid: %s</string>
+    
+    <!-- Errors -->
+    <string name="error_invalid_credentials">Invalid credentials</string>
+    <string name="error_network">Network error. Please check your connection.</string>
+    <string name="error_server">Server error. Please try again later.</string>
+    <string name="error_required_fields">Please fill in all required fields.</string>
+    
+    <!-- Success Messages -->
+    <string name="success_login">Login successful</string>
+    <string name="success_register">Registration successful</string>
+    <string name="success_complaint_submitted">Complaint submitted successfully</string>
+</resources>

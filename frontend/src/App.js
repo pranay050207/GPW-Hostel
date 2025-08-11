@@ -1175,6 +1175,7 @@ const AdminDashboard = () => {
     { id: 'students', name: 'Students', icon: '👥' },
     { id: 'complaints', name: 'Complaints', icon: '📝' },
     { id: 'payments', name: 'Payments', icon: '💳' },
+    { id: 'renewals', name: 'Renewals', icon: '🔄' },
     { id: 'mess', name: 'Mess Menu', icon: '🍽️' }
   ];
 

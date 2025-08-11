@@ -1040,6 +1040,30 @@ const AdminDashboard = () => {
     }
   };
 
+  const loadRenewals = async () => {
+    setLoading(true);
+    try {
+      const response = await apiCall('/api/renewal-forms');
+      setRenewals(response);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const updateRenewalStatus = async (renewalId, status, adminComments = '') => {
+    try {
+      await apiCall(`/api/renewal-forms/${renewalId}`, {
+        method: 'PUT',
+        body: JSON.stringify({ status, admin_comments: adminComments }),
+      });
+      loadRenewals();
+    } catch (err) {
+      alert(err.message);
+    }
+  };
+
   const createRoom = async (e) => {
     e.preventDefault();
     try {

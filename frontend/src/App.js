@@ -890,6 +890,142 @@ const StudentDashboard = () => {
             </div>
           )}
 
+          {/* Renewals Tab */}
+          {activeTab === 'renewals' && !loading && (
+            <div>
+              <h2 className="text-xl font-semibold mb-6">Room Renewal Applications</h2>
+              
+              {renewals.length > 0 ? (
+                <div className="space-y-6">
+                  {/* Filter buttons */}
+                  <div className="flex space-x-4">
+                    <button 
+                      onClick={() => setRenewals(renewals)} 
+                      className="px-4 py-2 bg-blue-100 text-blue-800 rounded-lg text-sm font-medium"
+                    >
+                      All ({renewals.length})
+                    </button>
+                    <button 
+                      onClick={() => setRenewals(renewals.filter(r => r.status === 'submitted'))} 
+                      className="px-4 py-2 bg-yellow-100 text-yellow-800 rounded-lg text-sm font-medium"
+                    >
+                      Pending ({renewals.filter(r => r.status === 'submitted').length})
+                    </button>
+                    <button 
+                      onClick={() => setRenewals(renewals.filter(r => r.status === 'under_review'))} 
+                      className="px-4 py-2 bg-orange-100 text-orange-800 rounded-lg text-sm font-medium"
+                    >
+                      Under Review ({renewals.filter(r => r.status === 'under_review').length})
+                    </button>
+                  </div>
+
+                  {/* Renewal applications */}
+                  <div className="grid gap-6">
+                    {renewals.map((renewal) => (
+                      <div key={renewal.id} className="bg-white border border-gray-200 rounded-lg p-6">
+                        <div className="flex justify-between items-start mb-4">
+                          <div>
+                            <h3 className="text-lg font-semibold text-gray-900">{renewal.student_name}</h3>
+                            <p className="text-sm text-gray-600">Room: {renewal.room_number}</p>
+                            <p className="text-sm text-gray-500">Submitted: {new Date(renewal.created_at).toLocaleDateString()}</p>
+                            {renewal.updated_at !== renewal.created_at && (
+                              <p className="text-sm text-gray-500">Updated: {new Date(renewal.updated_at).toLocaleDateString()}</p>
+                            )}
+                          </div>
+                          <span className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(renewal.status)}`}>
+                            {renewal.status.replace('_', ' ').toUpperCase()}
+                          </span>
+                        </div>
+
+                        {/* Documents section */}
+                        <div className="mb-4">
+                          <h4 className="font-medium text-gray-700 mb-2">Uploaded Documents:</h4>
+                          <div className="grid md:grid-cols-2 gap-3">
+                            {Object.entries(renewal.files || {}).map(([fileType, filename]) => (
+                              <div key={fileType} className="flex items-center justify-between p-2 bg-gray-50 rounded">
+                                <div className="flex items-center">
+                                  <svg className="w-4 h-4 text-blue-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                  </svg>
+                                  <span className="text-sm font-medium capitalize">
+                                    {fileType.replace('_', ' ')}
+                                  </span>
+                                </div>
+                                <a
+                                  href={`${API_BASE_URL}/api/download-file/${renewal.student_id}/${filename}`}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+                                >
+                                  View
+                                </a>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* Admin actions */}
+                        {['submitted', 'under_review'].includes(renewal.status) && (
+                          <div className="border-t pt-4">
+                            <div className="flex flex-col sm:flex-row gap-3">
+                              <button
+                                onClick={() => updateRenewalStatus(renewal.id, 'under_review')}
+                                disabled={renewal.status === 'under_review'}
+                                className="px-4 py-2 bg-orange-600 text-white rounded-md hover:bg-orange-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                              >
+                                Mark Under Review
+                              </button>
+                              <button
+                                onClick={() => {
+                                  const comments = prompt('Approval comments (optional):');
+                                  updateRenewalStatus(renewal.id, 'approved', comments || '');
+                                }}
+                                className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors"
+                              >
+                                Approve
+                              </button>
+                              <button
+                                onClick={() => {
+                                  const comments = prompt('Rejection reason (optional):');
+                                  updateRenewalStatus(renewal.id, 'rejected', comments || '');
+                                }}
+                                className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
+                              >
+                                Reject
+                              </button>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Admin comments */}
+                        {renewal.admin_comments && (
+                          <div className="mt-4 p-3 bg-blue-50 rounded border">
+                            <p className="text-sm font-medium text-blue-900">Admin Comments:</p>
+                            <p className="text-sm text-blue-800 mt-1">{renewal.admin_comments}</p>
+                            {renewal.reviewed_at && (
+                              <p className="text-xs text-blue-600 mt-1">
+                                Reviewed on: {new Date(renewal.reviewed_at).toLocaleDateString()}
+                                {renewal.reviewed_by && ` by ${renewal.reviewed_by}`}
+                              </p>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <div className="text-center py-12">
+                  <svg className="w-12 h-12 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                  <p className="text-gray-500 font-medium">No renewal applications found</p>
+                  <p className="text-gray-400 text-sm">Renewal applications will appear here when students submit them.</p>
+                </div>
+              )}
+            </div>
+          )}
+
           {/* Mess Menu Tab */}
           {activeTab === 'mess' && !loading && (
             <div>

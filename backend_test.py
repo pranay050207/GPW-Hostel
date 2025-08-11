@@ -7,6 +7,8 @@ Tests all API endpoints with realistic hostel data
 import requests
 import json
 import sys
+import io
+import os
 from datetime import datetime, timedelta
 
 # Backend URL from environment

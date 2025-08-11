@@ -29,6 +29,13 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Create uploads directory
+UPLOAD_DIR = "/app/uploads"
+os.makedirs(UPLOAD_DIR, exist_ok=True)
+
+# Mount static files for file access
+app.mount("/uploads", StaticFiles(directory=UPLOAD_DIR), name="uploads")
+
 # Database connection
 MONGO_URL = os.environ.get('MONGO_URL')
 client = MongoClient(MONGO_URL)

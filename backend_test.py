@@ -753,6 +753,7 @@ class HostelTestSuite:
         self.test_payment_system()
         self.test_mess_menu_management()
         self.test_student_management()
+        self.test_renewal_form_system()
         
         self.print_summary()
 

@@ -509,6 +509,236 @@ async def delete_student(student_id: str, current_user: dict = Depends(verify_to
     
     return {"message": "Student deleted successfully"}
 
+# File upload endpoints
+@app.post("/api/upload-file")
+async def upload_file(
+    file: UploadFile = File(...),
+    file_type: str = Form(...),  # "aadhar", "result", "caste_cert", "photo"
+    current_user: dict = Depends(verify_token)
+):
+    if current_user["role"] != "student":
+        raise HTTPException(status_code=403, detail="Only students can upload files")
+    
+    # Validate file type
+    if file_type not in ["aadhar", "result", "caste_cert", "photo"]:
+        raise HTTPException(status_code=400, detail="Invalid file type")
+    
+    # Validate file size (max 5MB per file)
+    if file.size > 5 * 1024 * 1024:
+        raise HTTPException(status_code=400, detail="File size too large (max 5MB)")
+    
+    # Validate file extension
+    allowed_extensions = [".jpg", ".jpeg", ".png", ".pdf"]
+    file_extension = os.path.splitext(file.filename)[1].lower()
+    if file_extension not in allowed_extensions:
+        raise HTTPException(status_code=400, detail="Invalid file format. Only JPG, PNG, and PDF files are allowed")
+    
+    # Get current user info
+    user = db.users.find_one({"email": current_user["email"]})
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    # Create user-specific directory
+    user_upload_dir = os.path.join(UPLOAD_DIR, user["id"])
+    os.makedirs(user_upload_dir, exist_ok=True)
+    
+    # Generate unique filename
+    file_id = str(uuid.uuid4())
+    filename = f"{file_type}_{file_id}{file_extension}"
+    file_path = os.path.join(user_upload_dir, filename)
+    
+    try:
+        # Save file
+        with open(file_path, "wb") as buffer:
+            shutil.copyfileobj(file.file, buffer)
+        
+        return {
+            "message": "File uploaded successfully",
+            "file_id": file_id,
+            "filename": filename,
+            "file_type": file_type,
+            "file_path": f"/uploads/{user['id']}/{filename}"
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"File upload failed: {str(e)}")
+
+@app.get("/api/download-file/{user_id}/{filename}")
+async def download_file(user_id: str, filename: str, current_user: dict = Depends(verify_token)):
+    # Admin can access all files, students can only access their own files
+    if current_user["role"] == "student":
+        user = db.users.find_one({"email": current_user["email"]})
+        if not user or user["id"] != user_id:
+            raise HTTPException(status_code=403, detail="Access denied")
+    
+    file_path = os.path.join(UPLOAD_DIR, user_id, filename)
+    if not os.path.exists(file_path):
+        raise HTTPException(status_code=404, detail="File not found")
+    
+    return FileResponse(file_path)
+
+# Renewal form endpoints
+@app.get("/api/renewal-forms")
+async def get_renewal_forms(current_user: dict = Depends(verify_token)):
+    if current_user["role"] == "student":
+        user = db.users.find_one({"email": current_user["email"]})
+        renewal_forms = list(db.renewal_forms.find({"student_id": user["id"]}, {"_id": 0}))
+    else:
+        renewal_forms = list(db.renewal_forms.find({}, {"_id": 0}))
+    
+    return renewal_forms
+
+@app.post("/api/renewal-forms")
+async def create_renewal_form(renewal_form: RenewalFormCreate, current_user: dict = Depends(verify_token)):
+    if current_user["role"] != "student":
+        raise HTTPException(status_code=403, detail="Only students can create renewal forms")
+    
+    user = db.users.find_one({"email": current_user["email"]})
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    if not user.get("room_number"):
+        raise HTTPException(status_code=400, detail="You must be assigned to a room to submit a renewal form")
+    
+    # Check if student already has a pending renewal form
+    existing_form = db.renewal_forms.find_one({
+        "student_id": user["id"],
+        "status": {"$in": ["submitted", "under_review"]}
+    })
+    
+    if existing_form:
+        raise HTTPException(status_code=400, detail="You already have a pending renewal form")
+    
+    renewal_form_doc = {
+        "id": str(uuid.uuid4()),
+        "student_id": user["id"],
+        "student_name": user["name"],
+        "room_number": user["room_number"],
+        "status": "submitted",
+        "files": renewal_form.files,
+        "admin_comments": None,
+        "created_at": datetime.now().isoformat(),
+        "updated_at": datetime.now().isoformat(),
+        "reviewed_at": None,
+        "reviewed_by": None
+    }
+    
+    db.renewal_forms.insert_one(renewal_form_doc)
+    return {"message": "Renewal form submitted successfully"}
+
+@app.get("/api/renewal-forms/{form_id}")
+async def get_renewal_form(form_id: str, current_user: dict = Depends(verify_token)):
+    renewal_form = db.renewal_forms.find_one({"id": form_id}, {"_id": 0})
+    if not renewal_form:
+        raise HTTPException(status_code=404, detail="Renewal form not found")
+    
+    # Students can only access their own forms, admins can access all
+    if current_user["role"] == "student":
+        user = db.users.find_one({"email": current_user["email"]})
+        if renewal_form["student_id"] != user["id"]:
+            raise HTTPException(status_code=403, detail="Access denied")
+    
+    return renewal_form
+
+@app.put("/api/renewal-forms/{form_id}")
+async def update_renewal_form(form_id: str, update_data: RenewalFormUpdate, current_user: dict = Depends(verify_token)):
+    renewal_form = db.renewal_forms.find_one({"id": form_id})
+    if not renewal_form:
+        raise HTTPException(status_code=404, detail="Renewal form not found")
+    
+    if current_user["role"] == "student":
+        # Students can only update their own forms and only if not approved/rejected
+        user = db.users.find_one({"email": current_user["email"]})
+        if renewal_form["student_id"] != user["id"]:
+            raise HTTPException(status_code=403, detail="Access denied")
+        
+        if renewal_form["status"] in ["approved", "rejected"]:
+            raise HTTPException(status_code=400, detail="Cannot update approved or rejected renewal forms")
+        
+        # Students can only update files, not status or admin_comments
+        if update_data.status or update_data.admin_comments:
+            raise HTTPException(status_code=403, detail="Students cannot update status or admin comments")
+        
+        # For students, we'll handle file updates through a separate endpoint
+        raise HTTPException(status_code=400, detail="Use file upload endpoints to update files")
+        
+    else:
+        # Admins can update status and comments
+        update_fields = {"updated_at": datetime.now().isoformat()}
+        
+        if update_data.status:
+            update_fields["status"] = update_data.status
+            if update_data.status in ["approved", "rejected"]:
+                update_fields["reviewed_at"] = datetime.now().isoformat()
+                update_fields["reviewed_by"] = current_user["email"]
+        
+        if update_data.admin_comments is not None:
+            update_fields["admin_comments"] = update_data.admin_comments
+        
+        db.renewal_forms.update_one(
+            {"id": form_id},
+            {"$set": update_fields}
+        )
+        
+        return {"message": "Renewal form updated successfully"}
+
+@app.put("/api/renewal-forms/{form_id}/files")
+async def update_renewal_form_files(form_id: str, files: dict, current_user: dict = Depends(verify_token)):
+    if current_user["role"] != "student":
+        raise HTTPException(status_code=403, detail="Only students can update files")
+    
+    renewal_form = db.renewal_forms.find_one({"id": form_id})
+    if not renewal_form:
+        raise HTTPException(status_code=404, detail="Renewal form not found")
+    
+    user = db.users.find_one({"email": current_user["email"]})
+    if renewal_form["student_id"] != user["id"]:
+        raise HTTPException(status_code=403, detail="Access denied")
+    
+    if renewal_form["status"] in ["approved", "rejected"]:
+        raise HTTPException(status_code=400, detail="Cannot update approved or rejected renewal forms")
+    
+    # Update files and reset status to submitted if it was under_review
+    update_fields = {
+        "files": {**renewal_form.get("files", {}), **files},
+        "updated_at": datetime.now().isoformat()
+    }
+    
+    if renewal_form["status"] == "under_review":
+        update_fields["status"] = "submitted"
+    
+    db.renewal_forms.update_one(
+        {"id": form_id},
+        {"$set": update_fields}
+    )
+    
+    return {"message": "Renewal form files updated successfully"}
+
+@app.delete("/api/renewal-forms/{form_id}")
+async def delete_renewal_form(form_id: str, current_user: dict = Depends(verify_token)):
+    if current_user["role"] != "admin":
+        raise HTTPException(status_code=403, detail="Only admins can delete renewal forms")
+    
+    renewal_form = db.renewal_forms.find_one({"id": form_id})
+    if not renewal_form:
+        raise HTTPException(status_code=404, detail="Renewal form not found")
+    
+    # Delete associated files
+    try:
+        user_upload_dir = os.path.join(UPLOAD_DIR, renewal_form["student_id"])
+        for file_type, filename in renewal_form.get("files", {}).items():
+            file_path = os.path.join(user_upload_dir, filename)
+            if os.path.exists(file_path):
+                os.remove(file_path)
+    except Exception as e:
+        print(f"Error deleting files: {e}")
+    
+    result = db.renewal_forms.delete_one({"id": form_id})
+    
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Renewal form not found")
+    
+    return {"message": "Renewal form deleted successfully"}
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8001)

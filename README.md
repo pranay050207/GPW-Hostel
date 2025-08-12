@@ -168,7 +168,25 @@ Compatible with FastAPI backend featuring these endpoints:
 - **Code Style**: Standard Java conventions
 - **Documentation**: Comprehensive inline documentation
 
-## 🔧 Configuration
+## 🔧 Android Studio 2024.3.2 Compatibility
+
+### ✅ Verified Features
+- **Android Gradle Plugin**: 8.7.2 (latest compatible)
+- **Gradle Version**: 8.11.1 with wrapper
+- **Target SDK**: 35 (Android 15)
+- **Compile SDK**: 35 (Android 15)
+- **Java Version**: 11 (recommended)
+- **Material Design**: 3.0 components
+- **ViewBinding**: Enabled for type-safe view references
+- **Build Optimizations**: R8 full mode, configuration cache, parallel builds
+
+### 🚀 Quick Setup for AS 2024.3.2
+1. **Open Project**: File → Open → Select project folder
+2. **Gradle Sync**: Android Studio will automatically sync
+3. **Build**: Build → Make Project (Ctrl+F9)
+4. **Run**: Select device/emulator → Run (Shift+F10)
+
+### 🔧 Configuration
 
 ### Customization Options
 - **Backend URL**: Update in `Constants.java`

@@ -39,7 +39,7 @@ app/
 │   ├── fragments/            # UI fragments for different features
 │   ├── models/              # Data models (User, Room, Complaint, etc.)
 │   ├── api/                 # Network layer (Retrofit interfaces)
-│   └── utils/               # Utility classes
+│   └���─ utils/               # Utility classes
 └── src/main/res/
     ├── layout/              # XML layouts
     ├── drawable/            # Graphics and styling
@@ -49,10 +49,11 @@ app/
 ## 🚀 Getting Started
 
 ### Prerequisites
-- **Android Studio**: Arctic Fox or later
-- **Android SDK**: API level 24+ (Android 7.0+)
-- **Java**: 8+
-- **Device/Emulator**: Android 7.0+ device
+- **Android Studio**: Meerkat Feature Drop 2024.3.2 or later
+- **Android SDK**: API level 35 (Android 15) - compile SDK
+- **Java**: 11+ (recommended for latest Android Studio)
+- **Gradle**: 8.11.1 (included with wrapper)
+- **Device/Emulator**: Android 7.0+ (API 24) device or emulator
 
 ### Installation
 
@@ -141,14 +142,20 @@ Compatible with FastAPI backend featuring these endpoints:
 
 ### Building
 ```bash
-# Debug build
-./gradlew assembleDebug
+# Clean and build debug
+./gradlew clean assembleDebug
 
-# Release build
-./gradlew assembleRelease
+# Release build with R8 optimization
+./gradlew clean assembleRelease
 
-# Install on device
+# Install debug on connected device
 ./gradlew installDebug
+
+# Run tests
+./gradlew test
+
+# Generate APK
+./gradlew build
 ```
 
 ### Testing

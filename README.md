@@ -39,7 +39,7 @@ app/
 │   ├── fragments/            # UI fragments for different features
 │   ├── models/              # Data models (User, Room, Complaint, etc.)
 │   ├── api/                 # Network layer (Retrofit interfaces)
-│   └── utils/               # Utility classes
+│   └���─ utils/               # Utility classes
 └── src/main/res/
     ├── layout/              # XML layouts
     ├── drawable/            # Graphics and styling
@@ -49,10 +49,11 @@ app/
 ## 🚀 Getting Started
 
 ### Prerequisites
-- **Android Studio**: Arctic Fox or later
-- **Android SDK**: API level 24+ (Android 7.0+)
-- **Java**: 8+
-- **Device/Emulator**: Android 7.0+ device
+- **Android Studio**: Meerkat Feature Drop 2024.3.2 or later
+- **Android SDK**: API level 35 (Android 15) - compile SDK
+- **Java**: 11+ (recommended for latest Android Studio)
+- **Gradle**: 8.11.1 (included with wrapper)
+- **Device/Emulator**: Android 7.0+ (API 24) device or emulator
 
 ### Installation
 
@@ -141,14 +142,20 @@ Compatible with FastAPI backend featuring these endpoints:
 
 ### Building
 ```bash
-# Debug build
-./gradlew assembleDebug
+# Clean and build debug
+./gradlew clean assembleDebug
 
-# Release build
-./gradlew assembleRelease
+# Release build with R8 optimization
+./gradlew clean assembleRelease
 
-# Install on device
+# Install debug on connected device
 ./gradlew installDebug
+
+# Run tests
+./gradlew test
+
+# Generate APK
+./gradlew build
 ```
 
 ### Testing
@@ -161,7 +168,25 @@ Compatible with FastAPI backend featuring these endpoints:
 - **Code Style**: Standard Java conventions
 - **Documentation**: Comprehensive inline documentation
 
-## 🔧 Configuration
+## 🔧 Android Studio 2024.3.2 Compatibility
+
+### ✅ Verified Features
+- **Android Gradle Plugin**: 8.7.2 (latest compatible)
+- **Gradle Version**: 8.11.1 with wrapper
+- **Target SDK**: 35 (Android 15)
+- **Compile SDK**: 35 (Android 15)
+- **Java Version**: 11 (recommended)
+- **Material Design**: 3.0 components
+- **ViewBinding**: Enabled for type-safe view references
+- **Build Optimizations**: R8 full mode, configuration cache, parallel builds
+
+### 🚀 Quick Setup for AS 2024.3.2
+1. **Open Project**: File → Open → Select project folder
+2. **Gradle Sync**: Android Studio will automatically sync
+3. **Build**: Build → Make Project (Ctrl+F9)
+4. **Run**: Select device/emulator → Run (Shift+F10)
+
+### 🔧 Configuration
 
 ### Customization Options
 - **Backend URL**: Update in `Constants.java`

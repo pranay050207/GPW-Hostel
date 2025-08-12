@@ -151,5 +151,5 @@ app.get('/', (req, res) => {
 });
 
 app.listen(PORT, () => {
-  console.log(\`GPW Hostel Manager info server running on http://localhost:\${PORT}\`);
+  console.log(`GPW Hostel Manager info server running on http://localhost:${PORT}`);
 });
